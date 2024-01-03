@@ -1,0 +1,34 @@
+<header class="container-fluid text-center bg-primary mb-3" <?php if(isset($header_hidden)) echo 'hidden'?>>
+    <nav class="navbar navbar-expand-lg">
+      <a class="navbar-brand" href="/">
+        <?php
+          use Phalcon\Tag;
+          echo Tag::image(
+            [
+              'favicon.ico',
+              'alt' => 'Logo',
+              'width' => '50',
+              'height' => '50'
+            ]
+          );
+         ?>
+         <span class='text-uppercase font-weight-bold text-light'>CHECKINGBOARD</span>
+      </a>
+      <button class="navbar-toggler navbar-dark" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse " id="navbarSupportedContent">
+        <ul class="navbar-nav m-auto" <?php if(!$this -> session -> has('user_id')) echo 'hidden'?>>
+          <li class="nav-item">
+           <a class="nav-link text-light" href="/profile/courses">Курсы</a>
+          </li>
+          <li class="nav-item">
+           <a class="nav-link text-light" href="/profile/settings">Настройки профиля</a>
+          </li>
+          <li class="nav-item">
+           <a class="nav-link text-light" href="/support">Поддержка</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+</header>

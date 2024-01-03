@@ -1,0 +1,97 @@
+<div class="modal fade" id="editTaskModal" tabindex="-1" aria-labelledby="editTaskModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id='editTaskModalLabel'>Изменение</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id='editTasksFileErrors'></div>
+        <form method='post' action='/profile/course/editTask' id='editTaskForm'>
+          <p>
+            <label for="editTaskTitle" class='form-label'>Название</label>
+          </p>
+          <p>
+            <?php
+              echo $form->render('editTaskTitle',[
+                'class' => 'form-control',
+                'required' => 'required',
+
+              ]);
+            ?>
+          </p>
+          <p>
+            <label for="editTaskScore" class='form-label'>Максимальный балл</label>
+          </p>
+          <p>
+            <?php
+              echo $form->render('editTaskScore',[
+                'class' => 'form-control',
+                'required' => 'required',
+                'disabled' =>''
+
+              ]);
+            ?>
+          </p>
+          <p>
+            <label for="editTaskDescription" class='form-label'>Описание</label>
+          </p>
+          <p style='color: black'>
+            <?php
+              echo $form->render('editTaskDescription',[
+                'class' => 'form-control',
+              ]);
+            ?>
+          </p>
+          <div id='editTaskUploadedFiles' class='mb-3'></div>
+          <div>
+            <label for="editTaskFiles" class='form-label'>Добавить файлы</label>
+            <?php
+              echo $form->render('editTaskFiles[]',[
+                'multiple' => '',
+                'id' => 'editTaskFiles',
+                'data-max-size' => '8192'
+              ]);
+            ?>
+            <a href='#' class='text-danger' id='clearEditTasksFiles'>Очистить</a>
+            <p><small>Максимальный размер каждого файла - 8 Мб</small></p>
+          </div>
+          <input id='editTasksFormCSRF' hidden name="editTasksFormCSRF" value="">
+          <input id='editTasksFormCourseCode' name='courseId' hidden value="">
+          <input id='editTasksFormTaskCode' name='taskId' hidden value="">
+        </form>
+        <script>
+          ClassicEditor
+            .create( document.querySelector( '#editTaskDescription' ), {
+              toolbar: {
+                items: [
+                  'heading',
+                  '|',
+                  'bold',
+                  'italic',
+                  'alignment',
+                  'bulletedList',
+                  'numberedList',
+                  '|',
+                  'undo',
+                  'redo'
+                ]
+              },
+            } )
+            .then( editorEditTask => {
+              window.editorEditTask = editorEditTask;
+            } )
+            .catch( error => {
+              console.error( error );
+            } );
+        </script>
+      </div>
+      <div class="modal-footer">
+        <button id='editTaskConfirmationBtn' type="button" class="btn btn-success">Изменить</button>
+        <button type="button" class="btn btn-danger" data-dismiss="modal">Отмена</button>
+      </div>
+    </div>
+  </div>
+</div>

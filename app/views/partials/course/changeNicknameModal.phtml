@@ -1,0 +1,32 @@
+<div class="modal fade" id="changeNicknameModal" tabindex="-1" aria-labelledby="changeNicknameModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="changeNicknameModalLabel">Изменение отображаемого имени</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body text-center">
+        <div id="changeNicknameMessages"></div>
+        <form method='post' action='/profile/course/changeNickname' id='changeNicknameForm'>
+          <p>
+            <label for="nickname" class='form-label'>Новое отображаемое имя</label>
+          </p>
+          <p>
+            <?php
+              echo $form->render('nickname',[
+                'class' => 'form-control',
+                'required' => 'required'
+              ]);
+            ?>
+          </p>
+          <p>
+            <input type='submit' value='Отправить' class='btn btn-danger'/>
+          </p>
+        </form>
+      </div>
+      <p class='text-center'><button type="button" class="btn btn-success" data-dismiss="modal">Отмена</button></p>
+    </div>
+  </div>
+</div>

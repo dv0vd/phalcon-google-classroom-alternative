@@ -1,0 +1,8 @@
+<?php
+  if($role -> role == 'user') {
+    echo $this -> view -> getPartial('course/taskUser');
+  } else {
+    echo $this -> view -> getPartial('course/taskAdmin');
+  }
+ ?>
+ 

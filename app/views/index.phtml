@@ -1,0 +1,34 @@
+<?php
+  $this->assets->addCss('css/bootstrap.min.css');
+  $this->assets->addCss('css/style.css');
+  $headerCollection = $this->assets->collection('header');
+  $headerCollection->addJs('js/jquery-3.6.0.min.js');
+  $headerCollection->addJs('js/bootstrap.min.js');
+  $headerCollection->addJs('js/ckeditor.js');
+  $footerCollection = $this->assets->collection('footer');
+  $footerCollection->addJs('js/main.js');
+  // $footerCollection->addJs('js/ckeditor.js');
+  // $this->assets->addJs('js/jquery-3.6.0.min.js');
+  // $this->assets->addJs('js/bootstrap.min.js');
+  // $this->assets->addJs('js/main.js');
+?>
+<!DOCTYPE html>
+<html lang="ru" dir="ltr">
+  <head>
+    <meta charset='utf-8'>
+    <meta name="csrf-token" content="<?php echo $this->security->getToken() ?>">
+    <meta name="csrf-param" content="<?php echo $this->security->getTokenKey() ?>">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="<?php echo $description ?>" />
+    <?php $this->assets->outputCss(); ?>
+    <title><?php echo $title ?></title>
+  </head>
+  <body class='bg-dark'>
+    <?php
+      $this->assets->outputJs('header');
+      echo $this->view->getPartial('partials/header');
+      echo $this->view->getContent();
+      $this->assets->outputJs('footer');
+   ?>
+  </body>
+</html>

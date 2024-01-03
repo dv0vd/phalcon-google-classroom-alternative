@@ -1,0 +1,56 @@
+<?php
+  use Phalcon\Forms\Form;
+  use Phalcon\Forms\Element\Email;
+  $form = new Form();
+  $form->add(
+    new Email('email')
+  );
+ ?>
+<div class="container text-light text-center mt-3">
+  <div class="row">
+    <div class="col-lg">
+      <h1 class='font-weight-bold'>Сброс пароля</h1>
+      <div id="messages">
+        <?php
+            if($this -> session -> get('expired') == true) {
+              echo "<div class='alert alert-danger' role='alert'>Упс... Срок действия ссылки закончился, повторите сброс пароля</div>";
+              $this -> session -> remove('expired');
+            }
+        ?>
+      </div>
+      <form method='post' action='/login/reset' id='resetPasswordForm'>
+        <p>
+          <label for="email" class='form-label'>Email</label>
+        </p>
+        <p>
+          <?php
+            echo $form->render('email',[
+              'class' => 'form-control',
+              'required' => 'required'
+            ]);
+          ?>
+        </p>
+        <p>
+          <input type='submit' value='Отправить' class='btn btn-primary'/>
+        </p>
+      </form>
+      <p><a class='text-warning' href='/login'>Назад</a></p>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="resetConfirmation" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="staticBackdropLabel">Подтвердите сброс пароля</h5>
+      </div>
+      <div class="modal-body">
+        <p>На Вашу электронную почту <b><span class='font-weight-bold' id='emailNotification'></span></b> было отправлено письмо с подтверждением. Для окончания регистрации перейдите по ссылке, указанной в письме.</p>
+      </div>
+      <div class="modal-footer">
+        <a href='#' id='changeDataLogin'>Изменить данные</a>
+        <a href="#" id='sendAgainLogin'>Не получили письмо? Отправить ещё раз</a>
+      </div>
+    </div>
+  </div>
+</div>

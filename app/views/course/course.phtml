@@ -1,0 +1,423 @@
+<?php
+  use Phalcon\Forms\Form;
+  use Phalcon\Forms\Element\Password;
+  use Phalcon\Forms\Element\Text;
+  use Phalcon\Forms\Element\Numeric;
+  use Phalcon\Forms\Element\File;
+  use Phalcon\Forms\Element\TextArea;
+  use Phalcon\Forms\Element\Select;
+  $form = new Form();
+  $form->add(
+    new Text('nickname')
+  );
+  $form->add(
+    new Text('newCourseName')
+  );
+  $form->add(
+    new Password('newPassword')
+  );
+  $form->add(
+    new Password('confirmPassword')
+  );
+  $form->add(
+    new Text('materialTitle')
+  );
+  $form->add(
+    new TextArea('materialDescription')
+  );
+  $form->add(
+    new File('materialFiles[]')
+  );
+  $form->add(
+    new Text('taskTitle')
+  );
+  $form->add(
+    new TextArea('taskDescription')
+  );
+  $form->add(
+    new File('taskFiles[]')
+  );
+  $form->add(
+    new Text('editMaterialTitle')
+  );
+  $form->add(
+    new TextArea('editMaterialDescription')
+  );
+  $form->add(
+    new File('editMaterialFiles[]')
+  );
+  $form->add(
+    new Text('editTaskTitle')
+  );
+  $form->add(
+    new TextArea('editTaskDescription')
+  );
+  $form->add(
+    new File('editTaskFiles[]')
+  );
+  $form->add(
+    new Numeric('taskScore')
+  );
+  $form->add(
+    new Numeric('editTaskScore')
+  );
+?>
+
+<div class="container text-center mt-3">
+  <div class="row">
+    <div class="col-lg">
+      <h1 id='courseName' class='font-weight-bold text-light'><?php echo $course -> name ?></h1>
+      <h6 class='text-danger'>
+        <?php
+          echo "Код курса: <u id='courseId'>".$course -> id."</u>";
+        ?>
+     </h6>
+     <h2 id='courseNickname' class='text-warning'>
+       <?php
+         $role_name = $role -> role;
+         if($role_name == 'owner') {
+           $role_name_russian = 'Владелец';
+         } else if ($role_name == 'admin'){
+           $role_name_russian = 'Администратор';
+         } else {
+           $role_name_russian = 'Пользователь';
+         }
+         echo $course_user -> nickname . " ($role_name_russian)";
+       ?>
+    </h2>
+    <ul class="nav nav-pills justify-content-center" role="tablist">
+      <li class="nav-item" role="presentation">
+        <a class="nav-link active" id="tasks-tab" data-toggle="tab" href="#tasks" role="tab" aria-controls="tasks" aria-selected="true"><h3 id = 'tasksHeading'>Задания</h3></a>
+      </li>
+      <li class="nav-item" role="presentation">
+        <a class="nav-link" id="materials-tab" data-toggle="tab" href="#materials" role="tab" aria-controls="materials" aria-selected="false"><h3 id = 'materialsHeading'>Материалы & Объявления</h3></a>
+      </li>
+      <li class="nav-item" role="presentation">
+        <a class="nav-link" id="settings-tab" data-toggle="tab" href="#settings" role="tab" aria-controls="settings" aria-selected="false"><h3>Настройки</h3></a>
+      </li>
+      <?php
+        if($role -> role != 'user') {
+          echo "<li class='nav-item' role='presentation'><a class='nav-link' id='members-tab' data-toggle='tab' href='#members' role='tab' aria-controls='settings' aria-selected='false'><h3 id='membersHeading'>Участники</h3></a></li>";
+        }
+       ?>
+    </ul>
+    <div class="tab-content mt-3">
+      <div class="tab-pane fade show active" id="tasks" role="tabpanel" aria-labelledby="tasks-tab">
+        <?php echo $this -> view -> getPartial('partials/course/tasksTab') ?>
+      </div>
+      <div class="tab-pane fade" id="materials" role="tabpanel" aria-labelledby="materials-tab">
+        <?php echo $this -> view -> getPartial('partials/course/materialsTab') ?>
+      </div>
+      <div class="tab-pane fade" id="settings" role="tabpanel" aria-labelledby="settings-tab">
+        <?php echo $this -> view -> getPartial('partials/course/settingsTab') ?>
+      </div>
+      <?php
+        if($role -> role != 'user') {
+          echo "<div class='tab-pane fade' id='members' role='tabpanel' aria-labelledby='members-tab'>";
+          echo $this -> view -> getPartial('partials/course/membersTab');
+          echo "</div>";
+        }
+       ?>
+    </div>
+    </div>
+  </div>
+</div>
+<script>
+
+  getTasks();
+  getMaterials();
+
+  if(document.referrer.includes('/material/')) {
+    $('#materials-tab').tab('show');
+    getMaterials();
+    clearNewMaterialsNotifications();
+  }
+
+  if(document.referrer.includes('/task/')) {
+    $('#tasks-tab').tab('show');
+    getTasks();
+    clearNewTasksNotifications();
+  }
+
+  setInterval(getMaterials, 5000);
+  setInterval(getTasks, 5000);
+  if (<?php if($role -> role != 'user') echo 1; else echo 0?>) {
+    setInterval(getMembers, 10000);
+  }
+
+  function getMaterials() {
+    $('#materialsTabMessages').empty();
+    var tokenKey = $("meta[name='csrf-param']").attr('content');
+    var token = $("meta[name='csrf-token']").attr('content');
+    var postData = {
+      courseId: $("#courseId").text(),
+    };
+    postData[tokenKey] = token;
+    $.ajax({
+        url: '/profile/course/getMaterials',
+        type: "post",
+        dataType: 'JSON',
+        data: postData,
+        success: function (data) {
+          $("meta[name='csrf-param']").attr('content', data[0].tokenKey);
+          $("meta[name='csrf-token']").attr('content', data[0].token);
+          if((data.length == 2) && (data[1].result == 'success')) {
+            $('#materialsTable tbody').empty()
+              for(var i=0; i<data[1].data.length; i++) {
+                var link = '/profile/course/' + data[1].data[i].course_id + '/material/' + data[1].data[i].id;
+                if (<?php if($role -> role == 'user') echo 1; else echo 0?>) {
+                  $('#materialsTable tbody').append("<tr><td><a class='text-light text-decoration-none courses_row' href='" + link + "'>" + data[1].data[i].title + "</td><td><a class='text-light text-decoration-none courses_row' href='" + link + "'>" + data[1].data[i].date_time + "</a></td></tr>");
+                } else {
+                  $('#materialsTable tbody').append("<tr><td><a class='text-light text-decoration-none courses_row' href='" + link + "'>" + data[1].data[i].title + "</a></td><td><a class='text-light text-decoration-none courses_row' href='" + link + "'>" + data[1].data[i].date_time + "</a></td><td><button class='editMaterial btn btn-primary' id='editMaterial" + data[1].data[i].id + "' type='button'>Редактировать</button><button class='removeMaterial btn btn-danger' id='removeMaterial" + data[1].data[i].id + "' type='button'>Удалить</button></td></tr>");
+                }
+              }
+              if(data[1].notification == true) {
+                $('#materialsHeading').text('Материалы & Объявления * ');
+              } else {
+                $('#materialsHeading').text('Материалы & Объявления');
+              }
+            } else {
+              location.reload();
+            }
+        },
+        error: function (data) {
+          $('#materialsTabMessages').append(ERROR_MESSAGE);
+        },
+    });
+  }
+
+  function getTasks() {
+    $('#tasksTabMessages').empty();
+    var tokenKey = $("meta[name='csrf-param']").attr('content');
+    var token = $("meta[name='csrf-token']").attr('content');
+    var postData = {
+      courseId: $("#courseId").text(),
+    };
+    postData[tokenKey] = token;
+    $.ajax({
+        url: '/profile/course/getTasks',
+        type: "post",
+        dataType: 'JSON',
+        data: postData,
+        success: function (data) {
+          $("meta[name='csrf-param']").attr('content', data[0].tokenKey);
+          $("meta[name='csrf-token']").attr('content', data[0].token);
+          if((data.length == 2) && (data[1].result == 'success')) {
+            $('#tasksTable tbody').empty()
+              for(var i=0; i<data[1].data.length; i++) {
+                var link = '/profile/course/' + data[1].data[i].course_id + '/task/' + data[1].data[i].id;
+                var task_score = -1;
+                for(var j = 0; j < data[1].completed_tasks.length; j++ ) {
+                  if(data[1].completed_tasks[j].task_id == data[1].data[i].id) {
+                    task_score = data[1].completed_tasks[j].score;
+                    break;
+                  }
+                }
+                var task_notification = false;
+                for(var j = 0; j < data[1].new_messages_notifications.length; j++ ) {
+                  if(data[1].new_messages_notifications[j].task_id == data[1].data[i].id) {
+                    task_notification = true;
+                    break;
+                  }
+                }
+                if (<?php if($role -> role == 'user') echo 1; else echo 0?>) {
+                  if(task_score == -1) {
+                    if(task_notification) {
+                        $('#tasksTable tbody').append("<tr><td><a class='text-light text-decoration-none courses_row' href='" + link + "'>" + data[1].data[i].title + " * </a></td><td><a class='text-light text-decoration-none courses_row' href='" + link + "'>" + data[1].data[i].date_time + "</a></td><td><a class='text-light text-decoration-none courses_row' href='" + link + "'> - </a></td><td><a class='text-light text-decoration-none courses_row' href='" + link + "'>" + data[1].data[i].score +"</a></td></tr>");
+                    } else {
+                        $('#tasksTable tbody').append("<tr><td><a class='text-light text-decoration-none courses_row' href='" + link + "'>" + data[1].data[i].title + "</a></td><td><a class='text-light text-decoration-none courses_row' href='" + link + "'>" + data[1].data[i].date_time + "</a></td><td><a class='text-light text-decoration-none courses_row' href='" + link + "'> - </a></td><td><a class='text-light text-decoration-none courses_row' href='" + link + "'>" + data[1].data[i].score +"</a></td></tr>");
+                    }
+                  } else {
+                    if(task_notification) {
+                      $('#tasksTable tbody').append("<tr><td><a class='text-light text-decoration-none courses_row' href='" + link + "'>" + data[1].data[i].title + " * </a></td><td><a class='text-light text-decoration-none courses_row' href='" + link + "'>" + data[1].data[i].date_time + "</a></td><td><a class='text-light text-decoration-none courses_row' href='" + link + "'>" + task_score + "</a></td><td><a class='text-light text-decoration-none courses_row' href='" + link + "'>" + data[1].data[i].score +"</a></td></tr>");
+                    } else {
+                      $('#tasksTable tbody').append("<tr><td><a class='text-light text-decoration-none courses_row' href='" + link + "'>" + data[1].data[i].title + "</a></td><td><a class='text-light text-decoration-none courses_row' href='" + link + "'>" + data[1].data[i].date_time + "</a></td><td><a class='text-light text-decoration-none courses_row' href='" + link + "'>" + task_score + "</a></td><td><a class='text-light text-decoration-none courses_row' href='" + link + "'>" + data[1].data[i].score +"</a></td></tr>");
+                    }
+                  }
+                } else {
+                  if(task_notification) {
+                        $('#tasksTable tbody').append("<tr><td><a class='text-light text-decoration-none courses_row' href='" + link + "'>" + data[1].data[i].title + " * </a></td><td><a class='text-light text-decoration-none courses_row' href='" + link + "'>" + data[1].data[i].date_time + "</a></td><td><button class='editTask btn btn-primary' id='editTask" + data[1].data[i].id + "' type='button'>Редактировать</button><button class='removeTask btn btn-danger' id='removeTask" + data[1].data[i].id + "' type='button'>Удалить</button></td></tr>");
+                  } else {
+                      $('#tasksTable tbody').append("<tr><td><a class='text-light text-decoration-none courses_row' href='" + link + "'>" + data[1].data[i].title + "</a></td><td><a class='text-light text-decoration-none courses_row' href='" + link + "'>" + data[1].data[i].date_time + "</a></td><td><button class='editTask btn btn-primary' id='editTask" + data[1].data[i].id + "' type='button'>Редактировать</button><button class='removeTask btn btn-danger' id='removeTask" + data[1].data[i].id + "' type='button'>Удалить</button></td></tr>");
+                  }
+
+
+
+
+
+                  // $('#tasksTable tbody').append("<tr><td><a class='text-light text-decoration-none courses_row' href='" + link + "'>" + data[1].data[i].title + "</a></td><td><a class='text-light text-decoration-none courses_row' href='" + link + "'>" + data[1].data[i].date_time + "</a></td><td><button class='editTask btn btn-primary' id='editTask" + data[1].data[i].id + "' type='button'>Редактировать</button><button class='removeTask btn btn-danger' id='removeTask" + data[1].data[i].id + "' type='button'>Удалить</button></td></tr>");
+                }
+              }
+              if(data[1].notification == true) {
+                $('#tasksHeading').text('Задания * ');
+              } else {
+                $('#tasksHeading').text('Задания');
+              }
+            } else {
+              location.reload();
+            }
+        },
+        error: function (data) {
+          $('#tasksTabMessages').append(ERROR_MESSAGE);
+        },
+    });
+  }
+
+  function getMembers() {
+    $('#membersTabMessages').empty();
+    var tokenKey = $("meta[name='csrf-param']").attr('content');
+    var token = $("meta[name='csrf-token']").attr('content');
+    var postData = {
+      courseId: $("#courseId").text(),
+    };
+    postData[tokenKey] = token;
+    $.ajax({
+        url: '/profile/course/getMembers',
+        type: "post",
+        dataType: 'JSON',
+        data: postData,
+        success: function (data) {
+          $("meta[name='csrf-param']").attr('content', data[0].tokenKey);
+          $("meta[name='csrf-token']").attr('content', data[0].token);
+          if((data.length == 2) && (data[1].result == 'success')) {
+            $('#membersTable tbody').empty()
+            for(var i=0; i<data[1].data.length; i++) {
+              var user_id = data[1].data[i].user_id;
+              var user_email;
+              for(var j = 0; j<data[1].users.length; j++) {
+                if(user_id == data[1].users[j].id) {
+                  user_email = data[1].users[j].email;
+                  break;
+                }
+              }
+              if(data[1].data[i].role_id == 1) {
+                $('#membersTable tbody').append("<tr><td>" + data[1].data[i].nickname + "</td><td>" + user_email + "</td><td><select id='changeMemberRole" + data[1].data[i].id + "' class='selectMemeberRole form-select'><option selected value='user'>Пользователь</option><option value='admin'>Администратор</option><option value='owner'>Владелец</option></select></td><td><button class='removeMember btn btn-danger' id='removeMember" + data[1].data[i].id + "' type='button' class='btn btn-danger'>Удалить участника</button></td></tr>");
+              } else if(data[1].data[i].role_id == 2) {
+                $('#membersTable tbody').append("<tr><td>" + data[1].data[i].nickname + "</td><td>" + user_email + "</td><td><select id='changeMemberRole" + data[1].data[i].id + "'class='selectMemeberRole form-select'><option value='user'>Пользователь</option><option selected value='admin'>Администратор</option><option value='owner'>Владелец</option></select></td><td><button class='removeMember btn btn-danger' id='removeMember" + data[1].data[i].id + "' type='button' class='btn btn-danger'>Удалить участника</button></td></tr>");
+              } else {
+                $('#membersTable tbody').prepend("<tr><td>" + data[1].data[i].nickname + "</td><td>" + user_email + "</td><td><select disabled id='changeMemberRole" + data[1].data[i].id + "'class='selectMemeberRole form-select'><option value='user'>Пользователь</option><option  value='admin'>Администратор</option><option selected value='owner'>Владелец</option></select></td><td><button disabled class='removeMember btn btn-danger' id='removeMember" + data[1].data[i].id + "' type='button' class='btn btn-danger'>Удалить участника</button></td></tr>");
+              }
+            }
+            if(data[1].notification == true) {
+              $('#membersHeading').text('Участники * ');
+            } else {
+              $('#membersHeading').text('Участники');
+            }
+          } else {
+            location.reload();
+          }
+        },
+        error: function (data) {
+          $('#membersTabMessages').append(ERROR_MESSAGE);
+        },
+    });
+  }
+
+  $('#members-tab').click(function(e) {
+    getMembers();
+    $('#membersTabMessages').empty();
+    var tokenKey = $("meta[name='csrf-param']").attr('content');
+    var token = $("meta[name='csrf-token']").attr('content');
+    var postData = {
+      courseId: $("#courseId").text(),
+    };
+    postData[tokenKey] = token;
+    $.ajax({
+        url: '/profile/course/clearNewMembersNotifications',
+        type: "post",
+        dataType: 'JSON',
+        data: postData,
+        success: function (data) {
+          $("meta[name='csrf-param']").attr('content', data[0].tokenKey);
+          $("meta[name='csrf-token']").attr('content', data[0].token);
+          if((data.length == 2) && (data[1].result == 'success')) {
+            $('#membersTabMessages').empty();
+            $('#membersHeading').text('Участники');
+          } else {
+            for(var i = 1; i < data.length; i++) {
+              $('#membersTabMessages').empty();
+              $('#membersTabMessages').append("<div class='alert alert-danger' role='alert'>" + data[i].message + "</div>");
+            }
+          }
+        },
+        error: function (data) {
+          $('#membersTabMessages').append(ERROR_MESSAGE);
+        },
+    });
+  });
+
+  function clearNewMaterialsNotifications() {
+    $('#materialsTabMessages').empty();
+    var tokenKey = $("meta[name='csrf-param']").attr('content');
+    var token = $("meta[name='csrf-token']").attr('content');
+    var postData = {
+      courseId: $("#courseId").text(),
+    };
+    postData[tokenKey] = token;
+    $.ajax({
+        url: '/profile/course/clearNewMaterialsNotifications',
+        type: "post",
+        dataType: 'JSON',
+        data: postData,
+        success: function (data) {
+          $("meta[name='csrf-param']").attr('content', data[0].tokenKey);
+          $("meta[name='csrf-token']").attr('content', data[0].token);
+          if((data.length == 2) && (data[1].result == 'success')) {
+            $('#materialsTabMessages').empty();
+            $('#materialsHeading').text('Материалы & Объявления');
+          } else {
+            for(var i = 1; i < data.length; i++) {
+              $('#materialsTabMessages').empty();
+              $('#materialsTabMessages').append("<div class='alert alert-danger' role='alert'>" + data[i].message + "</div>");
+            }
+          }
+        },
+        error: function (data) {
+          $('#materialsTabMessages').append(ERROR_MESSAGE);
+        },
+    });
+  }
+
+  function clearNewTasksNotifications() {
+    $('#tasksTabMessages').empty();
+    var tokenKey = $("meta[name='csrf-param']").attr('content');
+    var token = $("meta[name='csrf-token']").attr('content');
+    var postData = {
+      courseId: $("#courseId").text(),
+    };
+    postData[tokenKey] = token;
+    $.ajax({
+        url: '/profile/course/clearNewTasksNotifications',
+        type: "post",
+        dataType: 'JSON',
+        data: postData,
+        success: function (data) {
+          $("meta[name='csrf-param']").attr('content', data[0].tokenKey);
+          $("meta[name='csrf-token']").attr('content', data[0].token);
+          if((data.length == 2) && (data[1].result == 'success')) {
+            $('#tasksTabMessages').empty();
+            $('#tasksHeading').text('Задания');
+          } else {
+            for(var i = 1; i < data.length; i++) {
+              $('#tasksTabMessages').empty();
+              $('#tasksTabMessages').append("<div class='alert alert-danger' role='alert'>" + data[i].message + "</div>");
+            }
+          }
+        },
+        error: function (data) {
+          $('#tasksTabMessages').append(ERROR_MESSAGE);
+        },
+    });
+  }
+
+  $('#materials-tab').click(function(e) {
+    getMaterials();
+    clearNewMaterialsNotifications();
+  });
+
+  $('#tasks-tab').click(function(e) {
+    getTasks();
+    clearNewTasksNotifications();
+  });
+
+</script>

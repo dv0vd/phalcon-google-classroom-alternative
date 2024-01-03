@@ -1,0 +1,107 @@
+<?php
+  use Phalcon\Forms\Form;
+  use Phalcon\Forms\Element\Password;
+  use Phalcon\Forms\Element\Text;
+  $form = new Form();
+  $form->add(
+    new Text('name')
+  );
+  $form->add(
+    new Text('code')
+  );
+  $form->add(
+    new Password('password')
+  );
+  $form->add(
+    new Password('passwordCourse')
+  );
+  $form->add(
+    new Password('confirmPassword')
+  );
+  $form->add(
+    new Text('nickname')
+  );
+  $form->add(
+    new Text('nicknameJoin')
+  );
+ ?>
+<div class="container text-center mt-3">
+  <div class="row">
+    <div class="col-lg">
+      <h1 class='font-weight-bold text-light'>Мои курсы</h1>
+      <div id="coursesMessages"></div>
+      <div class="row">
+        <div class="col-lg">
+          <button type="button" id='joinCourseBtn' class='btn btn-primary mt-5'>Присоединиться</button>
+          <?php echo $this -> view -> getPartial('partials/profile/joinCourseModal'); ?>
+        </div>
+        <div class="col-lg">
+          <button id='createCourseBtn' type="button" class='btn btn-success mt-5'>Создать</button>
+          <?php echo $this -> view -> getPartial('partials/profile/createCourseModal'); ?>
+        </div>
+      </div>
+      <h2 class='font-weight-bold text-warning mt-3'>Посещаю</h2>
+      <div class="table-responsive-lg">
+        <table class="table table-striped table-dark table-hover">
+          <tbody>
+            <?php
+              if (count($courses_attend) == 0) {
+                echo "<tr><th><i>Вы не посещаете никакие курсы</i></th></tr>";
+              } else {
+                foreach($courses_attend as $course_attend) {
+                  $course = Courses::findFirstById($course_attend -> course_id);
+                  $name = $course -> name;
+                  $id = $course -> id;
+                  echo "<tr><th><a href='/profile/course/$id' class='text-light text-decoration-none courses_row'>$name</a></th></tr>";
+                }
+              }
+             ?>
+          </tbody>
+        </table>
+      </div>
+      <h2 class='font-weight-bold text-warning'>Преподаю</h2>
+      <div class="table-responsive-lg">
+        <table class="table table-striped table-dark table-hover">
+          <tbody>
+            <?php
+              if (count($courses_teach) == 0) {
+                echo "<tr><th><i>Вы не преподаёте никакие курсы</i></th></tr>";
+              } else {
+                foreach($courses_teach as $course_teach) {
+                  $course = Courses::findFirstById($course_teach -> course_id);
+                  $name = $course -> name;
+                  $id = $course -> id;
+                  echo "<tr><th><a href='/profile/course/$id' class='text-light text-decoration-none courses_row'>$name</a></th></tr>";
+
+                  // if(count($newMembersNotifications) == 0 && count($newMaterialsNotifications) == 0) {
+                  //   echo "<tr><th><a href='/profile/course/$id' class='text-light text-decoration-none courses_row'>$name</a></th></tr>";
+                  // } else {
+                    // foreach($newMembersNotifications as $newMembersNotification) {
+                    //   if($newMembersNotification -> course_id == $id) {
+                    //     echo "<tr><th><a href='/profile/course/$id' class='text-light text-decoration-none courses_row'>$name *</a></th></tr>";
+                    //     break;
+                    //   }
+                    //   echo "<tr><th><a href='/profile/course/$id' class='text-light text-decoration-none courses_row'>$name</a></th></tr>";
+                    // }
+                    // foreach($newMaterialsNotifications as $newMembersNotification) {
+                    //   if($newMembersNotification -> course_id == $id) {
+                    //     echo "<tr><th><a href='/profile/course/$id' class='text-light text-decoration-none courses_row'>$name *</a></th></tr>";
+                    //     break;
+                    //   }
+                    //   echo "<tr><th><a href='/profile/course/$id' class='text-light text-decoration-none courses_row'>$name</a></th></tr>";
+                    // }
+                  // }
+                }
+              }
+           ?>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  setInterval(function() {
+    location.reload();
+  }, 300000);
+</script>

@@ -1,0 +1,88 @@
+<?php
+  use Phalcon\Forms\Form;
+  use Phalcon\Forms\Element\Email;
+  use Phalcon\Forms\Element\Password;
+  $form = new Form();
+  $form->add(
+    new Email('email')
+  );
+  $form->add(
+    new Password('password')
+  );
+  $form->add(
+    new Password('confirmPassword')
+  );
+ ?>
+<div class="container text-light text-center mt-3">
+  <div class="row">
+    <div class="col-lg">
+      <h1 class='font-weight-bold'>Регистрация</h1>
+      <div id="messages">
+        <?php
+          if($this -> session -> get('expired') == true) {
+            echo "<div class='alert alert-danger' role='alert'>Упс... Срок действия ссылки закончился, повторите регистрацию</div>";
+            $this -> session -> remove('expired');
+          }
+        ?>
+      </div>
+      <form method='post' action='/signup' id='signupForm'>
+        <p>
+          <label for="email" class='form-label'>Email</label>
+        </p>
+        <p>
+          <?php
+            echo $form->render('email',[
+              'class' => 'form-control',
+              'required' => 'required'
+            ]);
+          ?>
+        </p>
+        <p>
+          <label for="password" class='form-label' >Пароль</label>
+        </p>
+        <p>
+          <?php
+            echo $form->render('password',[
+                'class' => 'form-control',
+                'required' => 'required',
+                'aria-describedby' => "passwordMin"
+            ]);
+          ?>
+          <small id='passwordMin' class="form-text">Минимум 8 символов</small>
+        </p>
+        <p>
+          <label for="confirmPassword" class='form-label'>Подтверждение пароля</label>
+        </p>
+        <p>
+          <?php
+            echo $form->render('confirmPassword',[
+                'class' => 'form-control',
+                'required' => 'required'
+            ]);
+          ?>
+        </p>
+        <p>
+          <input type='submit' value='Зарегистрироваться' class='btn btn-primary'/>
+        </p>
+      </form>
+      <p><a class='text-warning' href='/login'>Уже зарегистрированы? Войти</a></p>
+      <p><a class='text-warning' href='/'>На главную</a></p>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="signupConfirmation" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="staticBackdropLabel">Подтвердите регистрацию</h5>
+      </div>
+      <div class="modal-body">
+        <p>На Вашу электронную почту <b><span class='font-weight-bold' id='emailNotification'></span></b> было отправлено письмо с подтверждением. Для окончания регистрации перейдите по ссылке, указанной в письме.</p>
+      </div>
+      <div class="modal-footer">
+        <a href='#' id='changeDataSignup'>Изменить данные</a>
+        <a href="#" id='sendAgainSignup'>Не получили письмо? Отправить ещё раз</a>
+      </div>
+    </div>
+  </div>
+</div>

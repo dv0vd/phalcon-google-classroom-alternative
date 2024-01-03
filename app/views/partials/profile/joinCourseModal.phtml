@@ -1,0 +1,54 @@
+<div class="modal fade" id="joinCourseModal" tabindex="-1" aria-labelledby="joinCourseModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="joinCourseModalLabel">Присоединение к курсу</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body text-center">
+        <div id="joinCourseMessages"></div>
+        <form method='post' action='/profile/courses/join' id='joinCourseForm'>
+          <p>
+            <label for="code" class='form-label'>Код курса</label>
+          </p>
+          <p>
+            <?php
+              echo $form->render('code',[
+                'class' => 'form-control',
+                'required' => 'required'
+              ]);
+            ?>
+          </p>
+          <p>
+            <label for="password" class='form-label'>Пароль доступа</label>
+          </p>
+          <p>
+            <?php
+              echo $form->render('passwordCourse',[
+                'class' => 'form-control',
+                'required' => 'required'
+              ]);
+            ?>
+          </p>
+          <p>
+            <label for="nicknameJoin" class='form-label'>Ваше отображаемое имя</label>
+          </p>
+          <p>
+            <?php
+              echo $form->render('nicknameJoin',[
+                'class' => 'form-control',
+                'required' => 'required'
+              ]);
+            ?>
+          </p>
+          <p>
+            <input type='submit' value='Присоединиться' class='btn btn-success'/>
+          </p>
+        </form>
+        <p class='text-center'><button type="button" class="btn btn-danger" data-dismiss="modal">Отмена</button></p>
+      </div>
+    </div>
+  </div>
+</div>

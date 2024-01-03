@@ -1,0 +1,23 @@
+<div class="modal fade" id="changeMemberRoleModal" tabindex="-1" aria-labelledby="changeMemberRoleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id='changeMemberRoleModalLabel'>Изменение роли участника</h5>
+        <p hidden id='changeMemberRoleId'></p>
+        <p hidden id='changeMemberRoleValue'></p>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        Действительно изменить роль?
+        <p class=text-danger>Внимание! Если Вы передадите права на владение курсом другому пользователю, то вернуть их можно будет только если новый владелец сам передаст Вам это право!</p>
+        <p class=text-danger>Будьте внимательны!</p>
+      </div>
+      <div class="modal-footer">
+        <button id='changeMemberRoleConfirmationBtn' type="button" class="btn btn-danger">Да</button>
+        <button id='changeMemberRoleCancelBtn' type="button" class="btn btn-success" data-dismiss="modal">Нет</button>
+      </div>
+    </div>
+  </div>
+</div>

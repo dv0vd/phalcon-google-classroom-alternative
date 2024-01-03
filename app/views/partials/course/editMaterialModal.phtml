@@ -1,0 +1,84 @@
+<div class="modal fade" id="editMaterialModal" tabindex="-1" aria-labelledby="editMaterialModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id='editMaterialModalLabel'>Изменение</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id='editMaterialsFileErrors'></div>
+        <form method='post' action='/profile/course/editMaterial' id='editMaterialForm'>
+          <p>
+            <label for="editMaterialTitle" class='form-label'>Название</label>
+          </p>
+          <p>
+            <?php
+              echo $form->render('editMaterialTitle',[
+                'class' => 'form-control',
+                'required' => 'required',
+
+              ]);
+            ?>
+          </p>
+          <p>
+            <label for="editMaterialDescription" class='form-label'>Описание</label>
+          </p>
+          <p style='color: black'>
+            <?php
+              echo $form->render('editMaterialDescription',[
+                'class' => 'form-control',
+              ]);
+            ?>
+          </p>
+          <div id='editMaterialUploadedFiles' class='mb-3'></div>
+          <div>
+            <label for="editMaterialFiles" class='form-label'>Добавить файлы</label>
+            <?php
+              echo $form->render('editMaterialFiles[]',[
+                'multiple' => '',
+                'id' => 'editMaterialFiles',
+                'data-max-size' => '8192'
+              ]);
+            ?>
+            <a href='#' class='text-danger' id='clearEditMaterialsFiles'>Очистить</a>
+            <p><small>Максимальный размер каждого файла - 8 Мб</small></p>
+          </div>
+          <input id='editMaterialsFormCSRF' hidden name="editMaterialsFormCSRF" value="">
+          <input id='editMaterialsFormCourseCode' name='courseId' hidden value="">
+          <input id='editMaterialsFormMaterialCode' name='materialId' hidden value="">
+        </form>
+        <script>
+          ClassicEditor
+            .create( document.querySelector( '#editMaterialDescription' ), {
+              toolbar: {
+                items: [
+                  'heading',
+                  '|',
+                  'bold',
+                  'italic',
+                  'alignment',
+                  'bulletedList',
+                  'numberedList',
+                  '|',
+                  'undo',
+                  'redo'
+                ]
+              },
+            } )
+            .then( editor2 => {
+              window.editor2 = editor2;
+            } )
+            .catch( error => {
+              console.error( error );
+            } );
+        </script>
+      </div>
+      <div class="modal-footer">
+        <button id='editMaterialConfirmationBtn' type="button" class="btn btn-success">Изменить</button>
+        <button type="button" class="btn btn-danger" data-dismiss="modal">Отмена</button>
+      </div>
+    </div>
+  </div>
+</div>

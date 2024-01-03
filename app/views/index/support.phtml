@@ -1,0 +1,90 @@
+<?php
+  use Phalcon\Forms\Form;
+  use Phalcon\Forms\Element\Text;
+  use Phalcon\Forms\Element\Email;
+  use Phalcon\Forms\Element\TextArea;
+  $form = new Form();
+  $form->add(
+    new Email('contactFormEmail')
+  );
+  $form->add(
+    new Text('contactFormName')
+  );
+  $form->add(
+    new TextArea('contactFormQuestion')
+  );
+ ?>
+<div class="container text-light mt-3">
+  <div class="row  text-center">
+    <div class="col-lg">
+      <h1 class='font-weight-bold'>Поддержка</h1>
+      <p class='text-justify'>
+        CHECKINGBOARD - веб-сервис для работы с учебными заданиями в электронном виде. Призван наладить взаимодействие между преподавателями и обучающимися, независимо от того, где они находятся физически.
+        У обучающихся естьвозможность получать необходимые теоретические материалы и задания для выполнения, а у преподавателей — возможность получать результаты работ учеников, а также способность
+        обмениваться комментариями с обучающимися для объяснения ошибок или обсуждения работы.
+      </p>
+      <p>
+        Если у Вас возникли какие-либо вопросы, Вы можете написать нам на почту <b><i>checkingboard@bk.ru</i></b>, либо воспользоваться
+        формой обратной связи!
+      </p>
+      <h2 class='text-uppercase font-weight-bold mt-3 text-center' >Есть вопросы? Напишите нам!</h2>
+      <h5 class='text-uppercase font-weight-bold font-italic mt-3 text-center' >Ответим в ближайшее время</h5>
+      <div id="contactFormMessage"></div>
+      <form id='contactForm' action="/support/send" method='post'>
+        <div class="form-group ">
+            <p>
+                <label for="contactFormEmail" class='form-label' >Email</label>
+            </p>
+            <p>
+              <?php
+                $user_id = $this -> session -> get('user_id');
+                if($user_id == null) {
+                  echo $form->render('contactFormEmail',[
+                    'class' => 'form-control text-light bg-secondary',
+                    'required' => 'required'
+                  ]);
+                } else {
+                  $user = Users::findFirstById($user_id);
+                  echo $form->render('contactFormEmail',[
+                    'class' => 'form-control text-light bg-secondary',
+                    'required' => 'required',
+                    'value' => $user -> email
+                  ]);
+                }
+              ?>
+            </p>
+            <p>
+              <label for="contactFormName" class='form-label'>Имя</label>
+            </p>
+            <p>
+              <?php
+                echo $form->render('contactFormName',[
+                    'class' => 'form-control text-light bg-secondary',
+                    'required' => 'required'
+                ]);
+              ?>
+            </p>
+            <p>
+              <label class='form-label'>Вопрос</label>
+            </p>
+            <p>
+              <?php
+                echo $form->render('contactFormQuestion',[
+                    'class' => 'form-control text-light bg-secondary',
+                    'required' => 'required',
+                    'rows' => 5
+                ]);
+              ?>
+            </p>
+            <p class='text-center'>
+              <input type='submit' value='Отправить' class='btn btn-primary'/>
+            </p>
+          </div>
+        </form>
+      <p><a class='text-warning' href='/'>На главную</a></p>
+    </div>
+  </div>
+</div>
+<?php
+  echo $this->view->getPartial('partials/footer');
+ ?>

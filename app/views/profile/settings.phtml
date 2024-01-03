@@ -1,0 +1,49 @@
+<?php
+  use Phalcon\Forms\Form;
+  use Phalcon\Forms\Element\Password;
+  use Phalcon\Forms\Element\Email;
+  $form = new Form();
+  $form->add(
+    new Email('email')
+  );
+  $form->add(
+    new Password('oldPassword')
+  );
+  $form->add(
+    new Password('newPassword')
+  );
+  $form->add(
+    new Password('confirmPassword')
+  );
+ ?>
+<div class="container text-light mt-3">
+  <div class="row  text-center">
+    <div class="col-lg">
+      <h1 class='font-weight-bold'>Настройки профиля</h1>
+      <h2 class='text-danger' id='profileUserEmail'>
+        <?php
+          $user = Users::findFirstById($this -> session -> get('user_id'));
+          echo $user -> email;
+        ?>
+     </h2>
+     <div>
+       <?php
+         if($this -> session -> get('expired') == true) {
+           echo "<div class='alert alert-danger' role='alert'>Упс... Срок действия ссылки закончился, повторите изменение почты</div>";
+           $this -> session -> remove('expired');
+         }
+        ?>
+     </div>
+     <h3><a id='changeEmailBtn' href='#' class='text-warning'>Изменить электронную почту</a></h3>
+     <h3><a id='changePasswordBtn' href='#' class='text-warning'>Изменить пароль</a></h3>
+     <button id='exitBtn' type="button" class='btn btn-danger mt-5'>Выйти</button>
+     <p style='margin-top: 30vh'><a href='#' class='text-secondary' id='removeBtn'>Удалить учётную запись</a></p>
+   </div>
+  </div>
+</div>
+<?php
+  echo $this -> view -> getPartial('partials/profile/exitModal');
+  echo $this -> view -> getPartial('partials/profile/removeModal');
+  echo $this -> view -> getPartial('partials/profile/changeEmailModal');
+  echo $this -> view -> getPartial('partials/profile/changePasswordModal');
+ ?>

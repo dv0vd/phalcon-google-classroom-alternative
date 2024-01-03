@@ -1,0 +1,28 @@
+<div class="modal fade" id="leaveCourseModal" tabindex="-1" aria-labelledby="exitModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id='exitModalLabel'>Выход из курса</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- <p class='text-danger'>
+          Обратите внимание, что полностью удалятся все Ваши сообщения, а также все выполненные задания!
+        </p>
+        <p class='text-danger'>Удаление необратимо, восстановить данные будет невозможно!</p> -->
+        <p>Действительно покинуть курс?</p>
+        <?php
+          if($role -> role == 'admin') {
+            echo "<p class='text-danger'>Обратите внимание, что если Вы решите вернуться на курс, у Вас будут права обычного пользователя, для изменения которых нужно будет обратиться к администратору курса!</p>";
+          }
+         ?>
+      </div>
+      <div class="modal-footer">
+        <button id='leaveCourseConfirmationBtn' type="button" class="btn btn-danger">Да</button>
+        <button type="button" class="btn btn-success" data-dismiss="modal">Нет</button>
+      </div>
+    </div>
+  </div>
+</div>

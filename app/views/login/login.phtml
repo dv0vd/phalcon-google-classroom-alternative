@@ -1,0 +1,61 @@
+<?php
+  use Phalcon\Forms\Form;
+  use Phalcon\Forms\Element\Email;
+  use Phalcon\Forms\Element\Password;
+  $form = new Form();
+  $form->add(
+    new Email('email')
+  );
+  $form->add(
+    new Password('password')
+  );
+ ?>
+<div class="container text-light text-center mt-3">
+  <div class="row">
+    <div class="col-lg">
+      <h1 class='font-weight-bold'>Вход</h1>
+      <div id="messages">
+        <?php
+          if($this -> session -> get('complete') == true) {
+            echo "<div class='alert alert-success' role='alert'>Вы успешно зарегистрировались!</div>";
+            $this -> session -> remove('complete');
+          }
+          if($this -> session -> get('reset_password') == 'success') {
+            echo "<div class='alert alert-success' role='alert'>Пароль успешно изменён!</div>";
+            $this -> session -> remove('reset_password');
+          }
+        ?>
+      </div>
+      <form method='post' action='/login' id='loginForm'>
+        <p>
+          <label for="email" class='form-label'>Email</label>
+        </p>
+        <p>
+          <?php
+            echo $form->render('email',[
+              'class' => 'form-control',
+              'required' => 'required'
+            ]);
+          ?>
+        </p>
+        <p>
+          <label for="password" class='form-label'>Пароль</label>
+        </p>
+        <p>
+          <?php
+            echo $form->render('password',[
+                'class' => 'form-control',
+                'required' => 'required'
+            ]);
+          ?>
+        </p>
+        <p>
+          <input type='submit' value='Войти' class='btn btn-primary'/>
+        </p>
+      </form>
+      <p><a class='text-warning' href='/login/reset'>Забыли пароль?</a></p>
+      <p><a class='text-warning' href='/signup'>Ещё нет аккаунта? Зарегистрироваться</a></p>
+      <p><a class='text-warning' href='/'>На главную</a></p>
+    </div>
+  </div>
+</div>

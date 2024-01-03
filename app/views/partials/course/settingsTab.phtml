@@ -1,0 +1,23 @@
+<div id="settingsTabMessages"></div>
+<h3><a id='changeNicknameBtn' href='#' class='text-warning'>Изменить отображаемое имя</a></h3>
+<?php
+  $course_id = $course -> id;
+  if($role -> role == 'owner') {
+    echo "<h3><a id='changeCourseNameBtn' href='#' class='text-warning'>Изменить название курса</a></h3>";
+    echo "<h3><a id='changeCoursePasswordBtn' href='#' class='text-warning'>Изменить пароль доступа к курсу</a></h3>";
+    echo "<h3><a id='exportCourseBtn' href='/profile/course/$course_id/exportCourse' class='text-warning'>Экспорт результатов</a></h3>";
+  }
+ ?>
+<button id='leaveCourseBtn' type="button" class='btn btn-danger mt-5'>Покинуть курс</button>
+<!-- <p style='margin-top: 30vh'><a href='#' class='text-secondary' id='removeCourseBtn'>Удалить курс</a></p> -->
+
+<?php
+  if($role -> role == 'owner') {
+    echo "<p style='margin-top: 30vh'><a href='#' class='text-secondary' id='removeCourseBtn'>Удалить курс</a></p>";
+  }
+  echo $this -> view -> getPartial('partials/course/changeNicknameModal');
+  echo $this -> view -> getPartial('partials/course/leaveCourseModal');
+  echo $this -> view -> getPartial('partials/course/changeCourseNameModal');
+  echo $this -> view -> getPartial('partials/course/removeCourseModal');
+  echo $this -> view -> getPartial('partials/course/changeCoursePasswordModal');
+ ?>

@@ -1,0 +1,181 @@
+<?php
+  use Phalcon\Forms\Form;
+  use Phalcon\Forms\Element\TextArea;
+  use Phalcon\Forms\Element\File;
+  $form = new Form();
+  $form->add(
+    new TextArea('taskMessage')
+  );
+  $form->add(
+    new File('uploadTaskFiles[]')
+  );
+ ?>
+<div class="container mt-3">
+  <div class="row">
+    <div class="col-lg">
+      <h1 class='text-center font-weight-bold text-light'><?php echo $task -> title ?></h1>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-9">
+       <div class='container-fluid text-light rounded bg-secondary mb-3 p-3'>
+         <?php
+            $task_id = $task -> id;
+            $course_id = $course -> id;
+            echo $task -> description;
+            if(count($taskFiles) > 0) {
+              echo "<div class='border text-center p-3'>";
+              foreach($taskFiles as $taskFile) {
+                $file_id = $taskFile -> id;
+                $name = explode("__-__", $taskFile -> location);
+                echo "<p><a class='text-light' href='/profile/course/$course_id/task/$task_id/file/$file_id'>$name[1]</a></p>";
+              }
+              echo "</div>";
+            }
+          ?>
+       </div>
+    </div>
+    <div class="col-lg-3">
+      <form class='text-light text-center' method='post' action='/profile/course/task/uploadFilesForTask' id='uploadFilesForTask'>
+        <input id='tasksFormCSRF' hidden name="tasksFormCSRF" value="">
+        <input id='tasksFormCourseCode' name='courseId' hidden value="<?php echo $course -> id ?>">
+        <input id='tasksFormTaskCode' name='taskId' hidden value="<?php echo $task -> id ?>">
+        <p><b><i>Файлы для проверки:</i></b></p>
+        <div id='sendTaskFilesErrorMessages'></div>
+        <?php
+          if(count($usersFiles) == 0) {
+            echo $form->render('uploadTaskFiles[]',[
+              'multiple' => '',
+              'id' => 'uploadTaskFiles',
+              'data-max-size' => '8192',
+              'required' => ''
+            ]);
+            echo "<input type='submit' value='Отправить' class='btn btn-success m-3'/>";
+          } else {
+            echo "<div>";
+            foreach($usersFiles as $userFile) {
+              $name = explode("__-__", $userFile -> location);
+              echo "<p>$name[1]</p>";
+            }
+            echo "</div>";
+            echo "<button class='btn btn-danger' id='returnUsersFiles' type='button'>Отменить отправку</button>";
+          }
+         ?>
+      </form>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg text-center">
+      <p><a class='text-warning' href='/profile/course/<?php echo $this -> view -> course -> id ?>'>Назад</a></p>
+    </div>
+  </div>
+  <div class="row mt-5">
+    <div class="col-lg" >
+      <div id='tasksErrorMessages'></div>
+      <div id='taskResult' style='display:none' class='alert alert-success text-center mb-3'></div>
+      <form class='text-light text-center' method='post' action='/profile/course/task/sendMessage' id='sendMessageForm'>
+        <?php
+          echo $form->render('taskMessage',[
+            'class' => 'form-control',
+            'required' => 'required',
+            'placeholder' => 'Ваше сообщение ... '
+          ]);
+        ?>
+        <input id='sendMessageBtn' type='submit' value='Отправить' class='btn btn-success m-3'/>
+        <input id='courseId' value='' type='text' hidden/>
+        <input id='taskId' value='' type='text' hidden/>
+      </form>
+       <div id='taskMessages' class='container-fluid text-light rounded bg-secondary mb-3 p-3'></div>
+    </div>
+  </div>
+</div>
+<script>
+  $('#courseId').val('<?php echo $course -> id ?>');
+  $('#taskId').val('<?php echo $task -> id ?>');
+
+  getMessages();
+  setInterval(getMessages,1000);
+  setInterval(clearNewMessagesNotificationsUser,1000);
+
+  function clearNewMessagesNotificationsUser() {
+    $('#tasksErrorMessages').empty();
+    var tokenKey = $("meta[name='csrf-param']").attr('content');
+    var token = $("meta[name='csrf-token']").attr('content');
+    var postData = {
+      courseId: $("#courseId").val(),
+      taskId: $("#taskId").val(),
+    };
+    postData[tokenKey] = token;
+    $.ajax({
+        url: '/profile/course/clearNewMessagesNotificationsUser',
+        type: "post",
+        dataType: 'JSON',
+        data: postData,
+        success: function (data) {
+          $("meta[name='csrf-param']").attr('content', data[0].tokenKey);
+          $("meta[name='csrf-token']").attr('content', data[0].token);
+          if((data.length == 2) && (data[1].result == 'success')) {
+            $('#tasksErrorMessages').empty();
+            // $('#materialsHeading').text('Материалы & Объявления');
+          } else {
+            for(var i = 1; i < data.length; i++) {
+              $('#tasksErrorMessages').empty();
+              $('#tasksErrorMessages').append("<div class='alert alert-danger' role='alert'>" + data[i].message + "</div>");
+            }
+          }
+        },
+        error: function (data) {
+          $('#tasksErrorMessages').append(ERROR_MESSAGE);
+        },
+    });
+  }
+
+  function getMessages() {
+    $('#tasksErrorMessages').empty();
+    var tokenKey = $("meta[name='csrf-param']").attr('content');
+    var token = $("meta[name='csrf-token']").attr('content');
+    var postData = {
+      courseId: $("#courseId").val(),
+      taskId: $("#taskId").val(),
+    };
+    postData[tokenKey] = token;
+    $.ajax({
+        url: '/profile/course/getMessages',
+        type: "post",
+        dataType: 'JSON',
+        data: postData,
+        success: function (data) {
+          $("meta[name='csrf-param']").attr('content', data[0].tokenKey);
+          $("meta[name='csrf-token']").attr('content', data[0].token);
+          if((data.length == 2) && (data[1].result == 'success')) {
+            if(data[1].completed_task == null) {
+              $('#taskResult').hide();
+            } else {
+              $('#taskResult').show();
+              $('#taskResult').text("Задание принято! " + data[1].completed_task.score + " из " + "<?php echo $task -> score ?> баллов");
+            }
+            $('#taskMessages').empty();
+            for(var i=0; i<data[1].data.length; i++) {
+              var user_id = data[1].data[i].sender_id;
+              var user_name;
+              for(var j = 0; j<data[1].courses.length; j++) {
+                if(user_id == data[1].courses[j].user_id) {
+                  user_name = data[1].courses[j].nickname;
+                  break;
+                }
+              }
+              $('#taskMessages').append("<div class='mt-5'><p><b>" + user_name + "</b><small class='ml-5'>" + data[1].data[i].date_time + "</small></p><p>" + data[1].data[i].text + "</p></div>");
+            }
+          } else {
+            for(var i = 1; i < data.length; i++) {
+              $('#tasksErrorMessages').append("<div class='alert alert-danger' role='alert'>" + data[i].message + "</div>");
+            }
+          }
+        },
+        error: function (data) {
+          $('#tasksErrorMessages').append(ERROR_MESSAGE);
+        },
+    });
+  }
+
+</script>

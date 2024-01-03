@@ -1,0 +1,23 @@
+<div id="tasksTabMessages"></div>
+<?php
+  if($role -> role != 'user') {
+    echo $this -> view -> getPartial('partials/course/addTasksForm');
+    echo $this -> view -> getPartial('partials/course/editTaskModal');
+  }
+
+ ?>
+<div class="table-responsive-lg">
+  <table class="table table-striped table-dark table-hover" id='tasksTable'>
+      <thead>
+        <tr>
+          <th>Название</th>
+          <th>Дата & время публикации</th>
+          <?php if($role -> role != 'user') echo "<th>Действия</th>" ?>
+          <?php if($role -> role == 'user') echo "<th>Баллы</th>" ?>
+          <?php if($role -> role == 'user') echo "<th>Максимальный балл</th>" ?>
+        </tr>
+      </thead>
+    <tbody>
+   </tbody>
+  </table>
+</div>

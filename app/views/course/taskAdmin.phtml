@@ -1,0 +1,301 @@
+<?php
+  use Phalcon\Forms\Form;
+  use Phalcon\Forms\Element\TextArea;
+  use Phalcon\Forms\Element\Numeric;
+  $form = new Form();
+  $form->add(
+    new TextArea('taskMessage')
+  );
+  $form->add(
+    new TextArea('taskMessage')
+  );
+  $form->add(
+    new Numeric('taskScore')
+  );
+ ?>
+ <div id='tasksErrorMessages'></div>
+
+ <div class="container">
+   <div class="row">
+     <div class="col-3">
+       <?php
+        if($this -> session -> get('filter') == null ) {
+          echo "<span class='text-light'>Показывать </span><select id='filterSelect' class='form-select'><option selected value='all'>все</option><option value='unread'>непрочитанные</option></select>";
+        } else if ($this -> session -> get('filter') == 'all') {
+          echo "<span class='text-light'>Показывать </span><select id='filterSelect' class='form-select'><option selected value='all'>все</option><option value='unread'>непрочитанные</option></select>";
+        } else {
+          echo "<span class='text-light'>Показывать </span><select id='filterSelect' class='form-select'><option value='all'>все</option><option selected value='unread'>непрочитанные</option></select>";
+        }
+        if($this -> session -> get('sort') == null ) {
+          echo "<span class='text-light'>Сортировка </span><select id='sortSelect' class='form-select'><option selected value='name'>имя</option><option value='message'>время последнего сообщения</option></select>";
+        } else if ($this -> session -> get('sort') == 'name') {
+          echo "<span class='text-light'>Сортировка </span><select id='sortSelect' class='form-select'><option selected value='name'>имя</option><option value='message'>время последнего сообщения</option></select>";
+        } else {
+          echo "<span class='text-light'>Сортировка </span><select id='sortSelect' class='form-select'><option value='name'>имя</option><option selected value='message'>время последнего сообщения</option></select>";
+        }
+        ?>
+       <div class="nav flex-column nav-pills mt-5" id="v-pills-tab" role="tablist" aria-orientation="vertical"></div>
+     </div>
+     <div class="col-9">
+       <div class="container mt-3">
+         <div class="row">
+           <div class="col-lg">
+             <h1 class='text-center font-weight-bold text-light'><?php echo $task -> title ?></h1>
+           </div>
+         </div>
+         <div class="row">
+           <div class="col-lg-9">
+              <div class='container-fluid text-light rounded bg-secondary mb-3 p-3'>
+                <?php
+                   $task_id = $task -> id;
+                   $course_id = $course -> id;
+                   echo $task -> description;
+                   if(count($taskFiles) > 0) {
+                     echo "<div class='border text-center p-3'>";
+                     foreach($taskFiles as $taskFile) {
+                       $file_id = $taskFile -> id;
+                       $name = explode("__-__", $taskFile -> location);
+                       echo "<p><a class='text-light' href='/profile/course/$course_id/task/$task_id/file/$file_id'>$name[1]</a></p>";
+                     }
+                     echo "</div>";
+                   }
+                 ?>
+              </div>
+           </div>
+           <div class="col-lg-3 text-light">
+             <p><b><i>Файлы для проверки:</i></b></p>
+             <div id='usersFiles'></div>
+           </div>
+         </div>
+         <div class="row">
+           <div class="col-lg text-center">
+             <p><a class='text-warning' href='/profile/course/<?php echo $this -> view -> course -> id ?>'>Назад</a></p>
+           </div>
+         </div>
+         <div class="row mt-5">
+           <div class="col-lg" >
+             <div id='tasksErrorMessages'></div>
+             <form style='display:none' class='text-light text-center' method='post' action='/profile/course/task/scoreTask' id='scoreTaskFormAdmin'>
+               <p>
+                 <?php
+                   echo $form->render('taskScore',[
+                     'required' => 'required',
+                     'min' => '0',
+                     'value' => '0',
+                     'max' => $task -> score
+                   ]);
+                   echo " баллов из ";
+                   echo $task -> score;
+                 ?>
+                </p>
+               <input type='submit' value='Принять работу' class='btn btn-success m-3'/>
+               <input id='courseId' value='<?php echo $course -> id ?>' type='text' hidden/>
+               <input id='taskId' value='<?php echo $task -> id ?>' type='text' hidden/>
+             </form>
+             <form style='display:none' class='text-light text-center' method='post' action='/profile/course/task/cancelScoreTask' id='cancelScoreTaskFormAdmin'>
+               <p>
+                 <span id='scoredTask'></span>
+                 <?php
+                   // echo $form->render('taskScore',[
+                   //   'required' => 'required',
+                   //   'min' => '0',
+                   //   'value' => '0',
+                   //   'max' => $task -> score
+                   // ]);
+                   echo " баллов из ";
+                   echo $task -> score;
+                 ?>
+                </p>
+               <input type='submit' value='Отменить' class='btn btn-danger m-3'/>
+               <input id='courseId' value='<?php echo $course -> id ?>' type='text' hidden/>
+               <input id='taskId' value='<?php echo $task -> id ?>' type='text' hidden/>
+             </form>
+             <form style='display:none' class='text-light text-center' method='post' action='/profile/course/task/sendMessageAdmin' id='sendMessageFormAdmin'>
+               <?php
+                 echo $form->render('taskMessage',[
+                   'class' => 'form-control',
+                   'required' => 'required',
+                   'placeholder' => 'Ваше сообщение ... '
+                 ]);
+               ?>
+               <input id='sendMessageBtn' type='submit' value='Отправить' class='btn btn-success m-3'/>
+               <input id='courseId' value='<?php echo $course -> id ?>' type='text' hidden/>
+               <input id='taskId' value='<?php echo $task -> id ?>' type='text' hidden/>
+               <!-- <input id='receptionistId' type='text' hidden/> -->
+             </form>
+              <div style='display:none' id='taskMessages' class='container-fluid text-light rounded bg-secondary mb-3 p-3'></div>
+           </div>
+         </div>
+       </div>
+     </div>
+   </div>
+ </div>
+<script>
+
+  var user_id;
+
+  function getUserInfo() {
+    if(user_id == undefined) return;
+    var tokenKey = $("meta[name='csrf-param']").attr('content');
+    var token = $("meta[name='csrf-token']").attr('content');
+    var postData = {
+      courseId: $("#courseId").val(),
+      taskId: $("#taskId").val(),
+      userId: user_id
+    };
+    postData[tokenKey] = token;
+    $.ajax({
+        url: '/profile/course/getUserInfo',
+        type: "post",
+        dataType: 'JSON',
+        data: postData,
+        success: function (data) {
+          $("meta[name='csrf-param']").attr('content', data[0].tokenKey);
+          $("meta[name='csrf-token']").attr('content', data[0].token);
+          if((data.length == 2) && (data[1].result == 'success')) {
+            $('#taskMessages').empty();
+            $('#usersFiles').empty();
+            if(data[1].completed_task == null) {
+              $('#scoreTaskFormAdmin').show();
+              $('#cancelScoreTaskFormAdmin').hide();
+            } else {
+              $('#cancelScoreTaskFormAdmin').show();
+              $('#scoredTask').text(data[1].completed_task.score);
+              $('#scoreTaskFormAdmin').hide();
+            }
+            for(var i=0; i<data[1].data.length; i++) {
+              var user_id = data[1].data[i].sender_id;
+              var user_name;
+              for(var j = 0; j<data[1].courses.length; j++) {
+                if(user_id == data[1].courses[j].user_id) {
+                  user_name = data[1].courses[j].nickname;
+                  break;
+                }
+              }
+              $('#taskMessages').append("<div class='mt-5'><p><b>" + user_name + "</b><small class='ml-5'>" + data[1].data[i].date_time + "</small></p><p>" + data[1].data[i].text + "</p></div>");
+            }
+            for(var i = 0; i < data[1].files.length; i++ ) {
+              let name = data[1].files[i].location.split('__-__');
+              let file_id = data[1].files[i].id;
+              let course_id = $("#courseId").val();
+              let task_id = $("#taskId").val();
+              let link = '/profile/course/' + course_id + '/task/' + task_id + '/user/' + user_id + '/file/' + file_id;
+              $('#usersFiles').append("<a class='text-center text-light' href='" + link + "'><p>" + name[1] +"</p></a>")
+            }
+          } else {
+            for(var i = 1; i < data.length; i++) {
+              $('#tasksErrorMessages').append("<div class='alert alert-danger' role='alert'>" + data[i].message + "</div>");
+            }
+          }
+        },
+        error: function (data) {
+          $('#tasksErrorMessages').append(ERROR_MESSAGE);
+        },
+    });
+  }
+
+  $("body").on('click','.nav-link',function (e) {
+    $('#taskMessages').show();
+    $('#sendMessageFormAdmin').show();
+    user_id = e.target.id.substr(17);
+    getUserInfo();
+    clearNewMessagesNotifications();
+    setInterval(clearNewMessagesNotifications,  1000);
+
+  });
+
+  getAdminInfo();
+
+  setInterval(getAdminInfo, 1000);
+  setInterval(getUserInfo,  1000);
+  // setInterval(clearNewMessagesNotifications,  1000);
+
+  function clearNewMessagesNotifications() {
+    $('#tasksErrorMessages').empty();
+    var tokenKey = $("meta[name='csrf-param']").attr('content');
+    var token = $("meta[name='csrf-token']").attr('content');
+    var postData = {
+      courseId: $("#courseId").val(),
+      taskId: $("#taskId").val(),
+      userId: user_id,
+
+    };
+    postData[tokenKey] = token;
+    $.ajax({
+        url: '/profile/course/clearNewMessagesNotifications',
+        type: "post",
+        dataType: 'JSON',
+        data: postData,
+        success: function (data) {
+          $("meta[name='csrf-param']").attr('content', data[0].tokenKey);
+          $("meta[name='csrf-token']").attr('content', data[0].token);
+          if((data.length == 2) && (data[1].result == 'success')) {
+            $('#tasksErrorMessages').empty();
+            // $('#materialsHeading').text('Материалы & Объявления');
+          } else {
+            for(var i = 1; i < data.length; i++) {
+              $('#tasksErrorMessages').empty();
+              $('#tasksErrorMessages').append("<div class='alert alert-danger' role='alert'>" + data[i].message + "</div>");
+            }
+          }
+        },
+        error: function (data) {
+          $('#tasksErrorMessages').append(ERROR_MESSAGE);
+        },
+    });
+  }
+
+  function getAdminInfo() {
+    $('#tasksErrorMessages').empty();
+    if(user_id != undefined) {
+      setTimeout(function(){$("#v-pills-user-tab-"+ user_id).addClass('active');}, 30);
+    }
+    var tokenKey = $("meta[name='csrf-param']").attr('content');
+    var token = $("meta[name='csrf-token']").attr('content');
+    var postData = {
+      courseId: $("#courseId").val(),
+      taskId: $("#taskId").val(),
+      sort: $('#sortSelect').val(),
+      filter: $('#filterSelect').val(),
+      userId: user_id
+    };
+    postData[tokenKey] = token;
+    $.ajax({
+        url: '/profile/course/getAdminInfo',
+        type: "post",
+        dataType: 'JSON',
+        data: postData,
+        success: function (data) {
+          $("meta[name='csrf-param']").attr('content', data[0].tokenKey);
+          $("meta[name='csrf-token']").attr('content', data[0].token);
+          if((data.length == 2) && (data[1].result == 'success')) {
+            $('#v-pills-tab').empty();
+            for(var i = 0; i < data[1].data.length; i++) {
+
+              var task_notification = false;
+              for(var j = 0; j < data[1].new_messages_notifications.length; j++ ) {
+                if(data[1].new_messages_notifications[j].sender_id == data[1].data[i].user_id) {
+                  task_notification = true;
+                  break;
+                }
+              }
+              if(task_notification) {
+                $('#v-pills-tab').append("<a class='nav-link' id='v-pills-user-tab-" + data[1].data[i].user_id + "' data-toggle='pill' href='#v-pills-user-" + data[1].data[i].user_id + "' role='tab' aria-controls='v-pills-user-" + data[1].data[i].user_id + "' aria-selected='false'>" + data[1].data[i].nickname + " * </a>");
+
+              } else {
+                $('#v-pills-tab').append("<a class='nav-link' id='v-pills-user-tab-" + data[1].data[i].user_id + "' data-toggle='pill' href='#v-pills-user-" + data[1].data[i].user_id + "' role='tab' aria-controls='v-pills-user-" + data[1].data[i].user_id + "' aria-selected='false'>" + data[1].data[i].nickname + "</a>");
+              }
+            }
+          } else {
+            for(var i = 1; i < data.length; i++) {
+              $('#tasksErrorMessages').append("<div class='alert alert-danger' role='alert'>" + data[i].message + "</div>");
+            }
+          }
+        },
+        error: function (data) {
+          $('#tasksErrorMessages').append(ERROR_MESSAGE);
+        },
+    });
+  }
+
+</script>
